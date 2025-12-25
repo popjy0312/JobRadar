@@ -1,0 +1,139 @@
+# 채용 공고 모니터링 설정
+
+# 원하는 직무 키워드 (리스트로 여러 개 지정 가능)
+job_keywords:
+  # - "레드팀"
+  # - "오펜시브"
+  # - "Offensive"
+  # - "Red Team"
+  # - "보안"
+  - "모의해킹"
+  - "화이트"
+  # - "모의 침투"
+  # - "침투 테스트"
+  # - "CTF"
+
+# 제외할 키워드 (이 키워드가 포함된 공고는 제외)
+exclude_keywords:
+  - "인턴"
+  - "신입"
+  - "주니어"
+  - "관제"
+
+# 모니터링할 채용 사이트 (sites_config에 정의된 이름들)
+sites:
+  # - jobkorea
+  # - saramin
+  - skcareers
+
+# 사이트 설정
+# 모든 사이트는 동일한 형식으로 설정합니다
+sites_config:
+  - name: "jobkorea"
+    url_template: "https://www.jobkorea.co.kr/Search/?stext={keyword}"
+    method: "http"
+    base_url: "https://www.jobkorea.co.kr"
+    selectors:
+      job_list: "div[data-sentry-component='CardJob']"
+      # Structured extraction for complex DOM structure
+      extraction:
+        strategy: "structured"
+        # Link filter with conditions
+        link_filter:
+          selector: "a[href*='Recruit/GI_Read']"
+          has_child: "span[data-sentry-element='Typography']"  # Only links with Typography spans
+        title:
+          link_index: 0  # First text link
+          span_selector: "span[data-sentry-element='Typography']"
+          class_pattern: "size18"  # Match class containing 'size18'
+        company:
+          link_index: 1  # Second text link
+          span_selector: "span[data-sentry-element='Typography']"
+          class_pattern: "size16"  # Match class containing 'size16'
+          max_length: 50  # Company names are usually short
+      detail: ""
+      pagination:
+        param: "Page_No"
+        max_pages: 3
+  
+  - name: "saramin"
+    url_template: "https://www.saramin.co.kr/zf_user/search/recruit?searchword={keyword}"
+    method: "http"
+    base_url: "https://www.saramin.co.kr"
+    selectors:
+      job_list: "div.item_recruit"
+      title: "h2.job_tit a"
+      company: "strong.corp_name a"
+      link: "h2.job_tit a"
+      detail: "div.job_condition"
+      pagination:
+        param: "recruitPage"
+        max_pages: 3
+
+  - name: "skcareers"
+    url_template: "https://www.skcareers.com/Recruit" 
+    method: "selenium"
+    base_url: "https://www.skcareers.com"
+    search:
+      selector: "#SearchText"
+      action: "enter"
+    selectors:
+      job_list: "div.list-item"
+      title: "h2.title"
+      company: "div.company"
+      link: "a.list-link.url"
+      detail: "" 
+      pagination:
+        type: "infinite_scroll"
+        max_pages: 3
+
+
+# 스케줄 설정
+schedule:
+  # 체크할 시간대 설정 (한국시간 KST 기준)
+  # 옵션 1: 특정 시간대 리스트 (예: ["09:00", "12:00", "15:00", "18:00"])
+  # 옵션 2: 시간 범위와 주기 (예: start_time: "09:00", end_time: "18:00", interval_minutes: 60)
+  # 옵션 3: 간단한 주기 (예: interval_minutes: 60) - 24시간 체크
+  
+  # 방법 1: 특정 시간에만 체크 (리스트)
+  # times:
+  #   - "09:00"
+  #   - "12:00"
+  #   - "15:00"
+  #   - "18:00"
+  
+  # 방법 2: 시간 범위와 주기로 체크
+  start_time: "09:00"      # 시작 시간 (KST)
+  end_time: "18:00"        # 종료 시간 (KST)
+  interval_minutes: 60     # 체크 주기 (분 단위)
+  
+  # 방법 3: 24시간 주기로 체크 (위의 start_time, end_time을 주석 처리하고 사용)
+  # interval_minutes: 60
+
+# 알림 설정
+notifications:
+  # 터미널 출력
+  terminal: true
+  
+  # 이메일 알림
+  email:
+    enabled: false
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    from_email: ""
+    to_email: ""
+    password: ""  # 앱 비밀번호 사용 권장
+  
+  # SMS 알림 (추후 구현 가능)
+  sms:
+    enabled: false
+  
+  # 파일 저장
+  file:
+    enabled: true
+    output_dir: "output"  # 저장할 디렉토리
+    format: "json"  # "json" 또는 "txt"
+
+# 유사도 임계값 (0.0 ~ 1.0, 높을수록 더 엄격)
+similarity_threshold: 0.3
+
