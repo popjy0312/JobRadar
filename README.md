@@ -1,21 +1,33 @@
-# 채용 공고 모니터링 시스템
+# JobRadar 🎯
 
-한국의 주요 채용 사이트(잡코리아, 사람인, 원티드)를 자동으로 모니터링하고, 원하는 직무와 매칭되는 공고가 올라오면 알림을 보내는 Python 프로젝트입니다.
+한국의 주요 채용 사이트를 자동으로 모니터링하고, 원하는 키워드와 매칭되는 공고가 올라오면 알림을 보내는 Python 프로젝트입니다.
 
 ## 주요 기능
 
-- 🔍 **자동 채용 공고 파싱**: 잡코리아, 사람인, 원티드에서 자동으로 공고 수집
+- 🔍 **자동 채용 공고 파싱**: 잡코리아, 사람인, SK Careers 등 다양한 사이트 지원
+- 🌐 **SPA 사이트 지원**: JavaScript 기반 사이트도 Selenium으로 파싱
 - 🎯 **스마트 매칭**: 키워드 기반 유사도 계산으로 원하는 직무와 매칭
-- 🔔 **다양한 알림 방식**: 터미널 출력, 이메일 알림 지원
+- 🔔 **다양한 알림 방식**: 터미널 출력, 이메일, 파일 저장 지원
 - ⏰ **자동 스케줄링**: 설정한 주기마다 자동으로 체크
 - 📝 **중복 방지**: 이미 본 공고는 다시 알림하지 않음
+- 🛠️ **Selector Helper**: 새 사이트 추가를 위한 대화형 도우미 스크립트
+
+## 지원 사이트
+
+| 사이트 | 방식 | 상태 |
+|--------|------|------|
+| 잡코리아 (JobKorea) | HTTP | ✅ |
+| 사람인 (Saramin) | HTTP | ✅ |
+| SK Careers | Selenium (SPA) | ✅ |
+| 커스텀 사이트 | 설정 추가로 확장 가능 | ✅ |
 
 ## 설치 방법
 
-### 1. 저장소 클론 및 디렉토리 이동
+### 1. 저장소 클론
 
 ```bash
-cd /home/qq/recruit
+git clone https://github.com/popjy0312/JobRadar.git
+cd JobRadar
 ```
 
 ### 2. 가상 환경 생성 (권장)
@@ -33,376 +45,348 @@ venv\Scripts\activate  # Windows
 pip install -r requirements.txt
 ```
 
-### 4. Chrome 브라우저 설치 (선택사항)
+### 4. Chrome/Chromium 설치 (SPA 사이트용)
 
-**원티드(Wanted) 사이트를 사용하려면** Chrome 또는 Chromium 브라우저가 필요합니다.
+**SK Careers 등 JavaScript 기반 사이트를 모니터링하려면** Chrome 또는 Chromium이 필요합니다.
 
-#### Linux (Ubuntu/Debian)
 ```bash
-sudo apt-get update
+# Ubuntu/Debian
 sudo apt-get install chromium-browser
-# 또는
-sudo apt-get install chromium
-```
 
-#### Linux (WSL)
-```bash
-# WSL에서는 GUI 브라우저가 없으므로 headless 모드로 작동합니다
-sudo apt-get update
-sudo apt-get install chromium-browser
-```
-
-#### macOS
-```bash
+# macOS
 brew install --cask google-chrome
 ```
 
-#### Windows
-[Chrome 다운로드 페이지](https://www.google.com/chrome/)에서 설치
+> **Note**: Chrome이 없어도 HTTP 방식 사이트(잡코리아, 사람인)는 정상 작동합니다.
 
-## 설정 방법
+## 빠른 시작
 
 ### 1. config.yaml 설정
-
-`config.yaml` 파일을 열어서 다음을 설정하세요:
 
 ```yaml
 # 원하는 직무 키워드
 job_keywords:
   - "Python"
-  - "백엔드 개발자"
+  - "백엔드"
   - "Django"
-  - "Flask"
 
 # 제외할 키워드
 exclude_keywords:
   - "인턴"
-  - "신입만"
+  - "신입"
 
 # 모니터링할 사이트
 sites:
   - jobkorea
   - saramin
-  - wanted
-
-# 스케줄 설정 (한국시간 KST 기준)
-schedule:
-  # 방법 1: 특정 시간에만 체크
-  # times:
-  #   - "09:00"
-  #   - "12:00"
-  #   - "15:00"
-  #   - "18:00"
-  
-  # 방법 2: 시간 범위와 주기로 체크 (권장)
-  start_time: "09:00"      # 시작 시간 (KST)
-  end_time: "18:00"        # 종료 시간 (KST)
-  interval_minutes: 60     # 체크 주기 (분 단위)
-  
-  # 방법 3: 24시간 주기로 체크
-  # interval_minutes: 60
-
-# 알림 설정
-notifications:
-  terminal: true  # 터미널 출력
-  email:
-    enabled: true  # 이메일 알림 활성화
-    smtp_server: "smtp.gmail.com"
-    smtp_port: 587
-    from_email: "your_email@gmail.com"
-    to_email: "recipient@gmail.com"
-    password: "your_app_password"  # Gmail 앱 비밀번호
+  - skcareers
 ```
 
-### 2. 환경 변수 설정 (선택사항)
-
-이메일 설정을 환경 변수로 관리하려면 `.env` 파일을 생성하세요:
-
-```bash
-cp .env.example .env
-```
-
-`.env` 파일을 편집:
-
-```
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASSWORD=your_app_password
-EMAIL_TO=recipient@gmail.com
-```
-
-**Gmail 앱 비밀번호 생성 방법:**
-1. Google 계정 설정 → 보안
-2. 2단계 인증 활성화
-3. 앱 비밀번호 생성
-4. 생성된 비밀번호를 `EMAIL_PASSWORD`에 입력
-
-## 사용 방법
-
-### 기본 실행
+### 2. 실행
 
 ```bash
 python main.py
 ```
 
-프로그램이 실행되면:
-1. 설정한 스케줄에 따라 자동으로 채용 사이트를 체크합니다
-2. 매칭되는 새로운 공고가 발견되면 터미널에 출력하고 이메일로 알림을 보냅니다
-3. `Ctrl+C`로 종료할 수 있습니다
+## 설정 상세
 
-### 스케줄 설정 방법
+### config.yaml 구조
 
-#### 방법 1: 특정 시간에만 체크
+```yaml
+# 검색 키워드
+job_keywords:
+  - "모의해킹"
+  - "보안"
+
+# 제외 키워드
+exclude_keywords:
+  - "인턴"
+  - "신입"
+
+# 사용할 사이트 목록
+sites:
+  - jobkorea
+  - saramin
+  - skcareers
+
+# 사이트별 상세 설정
+sites_config:
+  - name: "jobkorea"
+    url_template: "https://www.jobkorea.co.kr/Search/?stext={keyword}"
+    method: "http"
+    base_url: "https://www.jobkorea.co.kr"
+    selectors:
+      job_list: "div[data-sentry-component='CardJob']"
+      # ... 상세 설정
+
+  - name: "skcareers"
+    url_template: "https://www.skcareers.com/Recruit"
+    method: "selenium"  # JavaScript 사이트
+    base_url: "https://www.skcareers.com"
+    search:  # SPA 검색 설정
+      selector: "#SearchText"
+      action: "enter"
+    selectors:
+      job_list: "div.list-item"
+      title: "h2.title"
+      company: "div.company"
+      link: "a.list-link.url"
+      pagination:
+        type: "infinite_scroll"
+        max_pages: 3
+
+# 스케줄 설정 (한국시간 KST 기준)
+schedule:
+  start_time: "09:00"
+  end_time: "18:00"
+  interval_minutes: 60
+
+# 알림 설정
+notifications:
+  terminal: true
+  email:
+    enabled: false
+  file:
+    enabled: true
+    output_dir: "output"
+    format: "json"
+
+# 유사도 임계값 (0.0 ~ 1.0)
+similarity_threshold: 0.3
+```
+
+### 사이트 파싱 방식
+
+#### HTTP 방식 (일반 사이트)
+정적 HTML을 반환하는 사이트에 사용합니다.
+
+```yaml
+- name: "saramin"
+  url_template: "https://www.saramin.co.kr/zf_user/search/recruit?searchword={keyword}"
+  method: "http"
+  selectors:
+    job_list: "div.item_recruit"
+    title: "h2.job_tit a"
+    company: "strong.corp_name a"
+    link: "h2.job_tit a"
+```
+
+#### Selenium 방식 (SPA 사이트)
+JavaScript로 렌더링되는 사이트에 사용합니다.
+
+```yaml
+- name: "skcareers"
+  url_template: "https://www.skcareers.com/Recruit"
+  method: "selenium"
+  search:  # 검색창 설정 (SPA용)
+    selector: "#SearchText"
+    action: "enter"
+  selectors:
+    job_list: "div.list-item"
+    title: "h2.title"
+    pagination:
+      type: "infinite_scroll"  # 무한 스크롤
+      max_pages: 3
+```
+
+### 페이지네이션 설정
+
+```yaml
+# URL 파라미터 방식
+pagination:
+  param: "page"      # ?page=1, ?page=2, ...
+  max_pages: 3
+
+# 무한 스크롤 방식
+pagination:
+  type: "infinite_scroll"
+  max_pages: 3       # 스크롤 횟수
+```
+
+## Selector Helper 사용법 🛠️
+
+새로운 사이트를 추가할 때 CSS 선택자를 쉽게 찾을 수 있는 대화형 도우미입니다.
+
+### 기본 사용법
+
+```bash
+python selector_helper.py "https://example.com/jobs"
+```
+
+### 실행 예시
+
+```bash
+# 일반 사이트 (URL에 검색어 포함)
+python selector_helper.py "https://www.saramin.co.kr/zf_user/search/recruit?searchword=python"
+
+# SPA 사이트 (검색창 사용)
+python selector_helper.py "https://www.skcareers.com/Recruit"
+
+# 특정 키워드로 검색 테스트
+python selector_helper.py "https://www.skcareers.com/Recruit" --search "Python"
+```
+
+### 대화형 프로세스
+
+```
+=== Recruit Site Configuration Helper ===
+
+[Step 1] Initializing Browser...
+Navigating to https://www.skcareers.com/Recruit...
+
+[Step 2] Understanding Search Method
+How does search work on this site?
+1. URL changes with search keyword (e.g. ?search=python)
+2. Search input field without URL change (SPA)
+3. No search - this is a complete static list
+
+Select (1-3): 2
+
+✓ SPA search mode activated.
+Found Search Inputs:
+[1] id='SearchText' name='SearchText' placeholder='Company, job...'
+Select search input (1-2): 1
+
+[Step 4] Identifying Job List Container
+[1] Selector: div.list-item (Found 11 times)
+[2] Selector: div.filter-item (Found 5 times)
+Select option (0-10): 1
+
+[Step 5] Identifying Item Details (Title, Company, Link)
+...
+
+[Step 7] Generating Configuration
+------------------------------------------------------------
+# Add this block to your config.yaml:
+  - name: "skcareers"
+    url_template: "https://www.skcareers.com/Recruit"
+    method: "selenium"
+    search:
+      selector: "#SearchText"
+      action: "enter"
+    selectors:
+      job_list: "div.list-item"
+      title: "h2.title"
+      company: "div.company"
+      link: "a.list-link.url"
+      pagination:
+        type: "infinite_scroll"
+        max_pages: 3
+------------------------------------------------------------
+✓ Configuration generated successfully!
+```
+
+### 생성된 설정 적용
+
+1. 출력된 YAML 블록을 복사
+2. `config.yaml`의 `sites_config` 섹션에 붙여넣기
+3. `sites` 목록에 사이트 이름 추가
+4. `python main.py`로 테스트
+
+## 스케줄 설정
+
+모든 시간은 **한국시간(KST, UTC+9)** 기준입니다.
+
+### 방법 1: 시간 범위 + 주기 (권장)
+
+```yaml
+schedule:
+  start_time: "09:00"    # 오전 9시부터
+  end_time: "18:00"      # 오후 6시까지
+  interval_minutes: 60   # 1시간마다
+```
+
+### 방법 2: 특정 시간대
+
 ```yaml
 schedule:
   times:
-    - "09:00"  # 오전 9시
-    - "12:00"  # 정오
-    - "15:00"  # 오후 3시
-    - "18:00"  # 오후 6시
+    - "09:00"
+    - "12:00"
+    - "18:00"
 ```
 
-#### 방법 2: 시간 범위와 주기로 체크 (권장)
+### 방법 3: 24시간 모니터링
+
 ```yaml
 schedule:
-  start_time: "09:00"      # 오전 9시부터
-  end_time: "18:00"        # 오후 6시까지
-  interval_minutes: 60     # 1시간마다 체크
+  interval_minutes: 60  # 1시간마다 (24시간)
 ```
 
-이 설정은 **한국시간(KST, UTC+9) 기준**으로 작동합니다.
+## 프로젝트 구조
 
-#### 방법 3: 24시간 주기로 체크
-```yaml
-schedule:
-  interval_minutes: 60  # 1시간마다 체크 (24시간)
 ```
-
-### 일회성 실행 (스케줄링 없이)
-
-```python
-from recruit import JobScheduler
-import yaml
-
-with open('config.yaml', 'r', encoding='utf-8') as f:
-    config = yaml.safe_load(f)
-
-scheduler = JobScheduler(config)
-scheduler.check_jobs()  # 한 번만 체크
+JobRadar/
+├── recruit/               # 메인 패키지
+│   ├── __init__.py
+│   ├── parser.py          # 사이트 파서 (HTTP, Selenium)
+│   ├── matcher.py         # 키워드 매칭 로직
+│   ├── notifier.py        # 알림 시스템
+│   └── scheduler.py       # 스케줄러
+├── data/                  # 데이터 저장
+│   └── job_history.json   # 중복 방지용 히스토리
+├── output/                # 결과 파일 저장
+├── tests/                 # 테스트 코드
+├── main.py                # 메인 실행 스크립트
+├── selector_helper.py     # 선택자 찾기 도우미
+├── config.yaml            # 설정 파일
+└── requirements.txt       # 의존성
 ```
 
 ## 출력 예시
 
 ```
 ================================================================================
-🚀 새로운 채용 공고 발견! (3개)
+🚀 새로운 채용 공고 발견! (2개)
 ================================================================================
 
-[1] Python 백엔드 개발자 채용
+[1] 보안 취약점 진단 및 모의해킹 분야 전문가
+    회사: SK broadband
+    링크: https://www.skcareers.com/Recruit/Detail/R252XXX
+    출처: skcareers
+    유사도: 92.00%
+    매칭 키워드: 모의해킹
+
+[2] Python 백엔드 개발자
     회사: (주)테크스타트업
     링크: https://www.jobkorea.co.kr/...
     출처: jobkorea
     유사도: 85.00%
     매칭 키워드: Python
-    상세: Python, Django, REST API...
-
-[2] 백엔드 개발자 (Django)
-    회사: 스타트업B
-    링크: https://www.saramin.co.kr/...
-    출처: saramin
-    유사도: 72.50%
-    매칭 키워드: 백엔드 개발자
-    상세: Django, PostgreSQL...
 
 ================================================================================
 ```
 
-## 프로젝트 구조
+## 문제 해결
 
-```
-recruit/
-├── recruit/            # 메인 패키지
-│   ├── __init__.py    # 패키지 초기화
-│   ├── parser.py      # 채용 사이트 파서
-│   ├── matcher.py     # 직무 매칭 로직
-│   ├── notifier.py    # 알림 시스템
-│   └── scheduler.py   # 스케줄러 모듈
-├── tests/             # 테스트 코드 (선택사항)
-│   └── __init__.py
-├── main.py            # 메인 실행 스크립트
-├── config.yaml        # 설정 파일
-├── requirements.txt   # 패키지 의존성
-├── .env.example       # 환경 변수 예시
-├── .gitignore
-└── README.md
+### Chrome/Chromium 관련
+
+```bash
+# Chrome 설치 확인
+which chromium-browser || which chromium || which google-chrome
+
+# Ubuntu/Debian에서 설치
+sudo apt-get install chromium-browser
 ```
 
-## 커스터마이징
+### 파싱이 안 될 때
 
-### 새로운 채용 사이트 추가
+1. 사이트 구조가 변경되었을 수 있습니다
+2. `selector_helper.py`로 새 선택자를 찾아보세요
+3. 네트워크 연결을 확인하세요
 
-코드를 수정하지 않고 `config.yaml`에 설정만 추가하면 새로운 사이트를 모니터링할 수 있습니다.
+### 이메일이 안 갈 때
 
-**모든 사이트(기본 사이트 포함)는 동일한 방식으로 설정됩니다.**
-
-#### 설정 방법
-
-`config.yaml`의 `sites_config` 섹션에 사이트를 추가하세요:
-
-##### 방법 1: 간단한 선택자 (Simple Strategy)
-
-일반적인 사이트에 적합합니다:
-
-```yaml
-sites_config:
-  - name: "mysite"
-    url_template: "https://example.com/search?q={keyword}"
-    method: "http"
-    base_url: "https://example.com"
-    selectors:
-      job_list: "div.job-item"
-      title: "a.job-title"
-      company: "span.company-name"
-      link: "a.job-title"
-      detail: "p.job-detail"  # 선택사항
-```
-
-##### 방법 2: 구조적 추출 (Structured Strategy)
-
-복잡한 DOM 구조나 CSS-in-JS를 사용하는 사이트에 적합합니다:
-
-```yaml
-sites_config:
-  - name: "complexsite"
-    url_template: "https://example.com/search?q={keyword}"
-    method: "http"
-    base_url: "https://example.com"
-    selectors:
-      job_list: "div[data-component='JobCard']"
-      extraction:
-        strategy: "structured"
-        # 링크 필터 설정
-        link_filter:
-          selector: "a[href*='/jobs/']"  # 기본 선택자
-          has_child: "span[data-element='Typography']"  # Typography 자식이 있는 링크만
-          not_has_attribute:
-            name: "data-component"
-            value: "CompanyLogo"  # 로고 링크 제외
-        title:
-          link_index: 0  # 첫 번째 링크
-          span_selector: "span[data-element='Typography']"
-          class_pattern: "size18"  # 클래스에 포함된 패턴
-        company:
-          link_index: 1  # 두 번째 링크
-          span_selector: "span[data-element='Typography']"
-          class_pattern: "size16"
-          max_length: 50  # 회사명 최대 길이
-      detail: ""
-```
-
-**구조적 추출 옵션:**
-- `link_filter`: 링크 필터 설정 (dictionary)
-  - `selector`: 기본 CSS 선택자
-  - `has_child`: 특정 자식 요소가 있는 경우만 (CSS 선택자)
-  - `not_has_child`: 특정 자식 요소가 없는 경우만
-  - `has_attribute`: 특정 속성이 있는 경우만 (문자열 또는 {name, value})
-  - `not_has_attribute`: 특정 속성이 없거나 값이 다른 경우만
-  - `has_text`: 특정 텍스트를 포함하는 경우만
-  - `not_has_text`: 특정 텍스트를 포함하지 않는 경우만
-- `title.link_index`: 제목이 있는 링크의 인덱스 (0부터 시작)
-- `title.span_selector`: 링크 내부의 span 선택자
-- `title.class_pattern`: 클래스명에 포함될 패턴 (예: "size18")
-- `company.*`: 회사명도 동일한 방식으로 설정
-
-**간단한 필터 예시:**
-```yaml
-# 단순 선택자만 사용 (하위 호환)
-link_filter: "a[href*='/jobs/']"
-
-# 자식 요소 체크
-link_filter:
-  selector: "a[href*='/jobs/']"
-  has_child: "span.title"
-
-# 여러 조건 조합
-link_filter:
-  selector: "a"
-  has_child: "h3"
-  not_has_text: "광고"
-  has_attribute:
-    name: "data-job-id"
-```
-
-#### 예시 1: HTTP 방식 (일반 사이트)
-
-```yaml
-sites_config:
-  - name: "techjob"
-    url_template: "https://techjob.com/search?keyword={keyword}"
-    method: "http"
-    base_url: "https://techjob.com"
-    selectors:
-      job_list: "div.job-card"
-      title: "h3.job-title"
-      company: "span.company"
-      link: "a.job-link"
-      detail: "p.description"
-```
-
-#### 예시 2: Selenium 방식 (JavaScript 사이트)
-
-```yaml
-sites_config:
-  - name: "modernsite"
-    url_template: "https://modernsite.com/jobs?search={keyword}"
-    method: "selenium"  # JavaScript로 동적 렌더링되는 사이트
-    base_url: "https://modernsite.com"
-    selectors:
-      job_list: "div[data-testid='job-card']"
-      title: "h2.job-title"
-      company: "div.company-name"
-      link: "a.job-link"
-```
-
-#### CSS 선택자 찾는 방법
-
-1. 브라우저에서 사이트 열기
-2. F12 (개발자 도구) 열기
-3. Elements 탭에서 원하는 요소 선택
-4. 우클릭 → Copy → Copy selector
-
-#### 주의사항
-
-- `name`은 고유해야 합니다
-- `url_template`에서 `{keyword}`는 자동으로 검색 키워드로 대체됩니다
-- `method: "selenium"` 사용 시 Chrome/Chromium이 필요합니다
-- 선택자가 정확하지 않으면 공고를 찾지 못할 수 있습니다
-- 기본 사이트(jobkorea, saramin, wanted)도 `sites_config`에서 설정을 변경할 수 있습니다
-
-### 알림 방식 추가
-
-`recruit/notifier.py`에 새로운 알림 메서드를 추가하고 `notify()` 메서드에서 호출하세요.
-
-예: Slack, Discord, Telegram 등
+1. Gmail 앱 비밀번호 확인 (일반 비밀번호 아님)
+2. 2단계 인증 활성화 필요
+3. SMTP 포트(587) 방화벽 확인
 
 ## 주의사항
 
-1. **사이트 정책 준수**: 각 채용 사이트의 이용약관을 확인하고 준수하세요. 과도한 요청은 IP 차단을 받을 수 있습니다.
-2. **요청 간격**: `interval_minutes`를 너무 짧게 설정하지 마세요 (최소 30분 권장).
-3. **Chrome 브라우저**: JavaScript 기반 사이트 파싱을 위해 Chrome/Chromium이 필요합니다. 없어도 다른 사이트는 정상 작동합니다.
-4. **시간대 설정**: 스케줄은 한국시간(KST, UTC+9) 기준으로 작동합니다.
+⚠️ **사이트 정책 준수**: 각 채용 사이트의 이용약관을 확인하세요. 과도한 요청은 IP 차단을 받을 수 있습니다.
 
-## 문제 해결
-
-### 파싱이 안 될 때
-- 사이트 구조가 변경되었을 수 있습니다. 파서 코드를 업데이트해야 할 수 있습니다.
-- 네트워크 연결을 확인하세요.
-
-### 이메일이 안 갈 때
-- Gmail 앱 비밀번호가 올바른지 확인하세요.
-- 2단계 인증이 활성화되어 있는지 확인하세요.
-- 방화벽에서 SMTP 포트(587)가 차단되지 않았는지 확인하세요.
+⚠️ **요청 간격**: `interval_minutes`를 최소 30분 이상으로 설정하세요.
 
 ## 라이선스
 
-이 프로젝트는 개인 사용 목적으로 만들어졌습니다.
-
+MIT License
