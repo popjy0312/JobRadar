@@ -5,10 +5,12 @@ job_keywords:
   # - "레드팀"
   # - "오펜시브"
   # - "Offensive"
-  # - "Red Team"
-  # - "보안"
+  - "Red Team"
+  - "보안"
   - "모의해킹"
   - "화이트"
+  - "security"
+  - "hacking"
   # - "모의 침투"
   # - "침투 테스트"
   # - "CTF"
@@ -22,8 +24,8 @@ exclude_keywords:
 
 # 모니터링할 채용 사이트 (sites_config에 정의된 이름들)
 sites:
-  # - jobkorea
-  # - saramin
+  - jobkorea
+  - saramin
   - skcareers
 
 # 사이트 설정
@@ -124,7 +126,7 @@ notifications:
     to_email: ""
     password: ""  # 앱 비밀번호 사용 권장
   
-  # SMS 알림 (추후 구현 가능)
+  # SMS 알림 (추후 구현)
   sms:
     enabled: false
   
