@@ -2,15 +2,15 @@
 
 # 원하는 직무 키워드 (리스트로 여러 개 지정 가능)
 job_keywords:
-  # - "레드팀"
+  - "레드팀"
   # - "오펜시브"
   # - "Offensive"
   - "Red Team"
   - "보안"
   - "모의해킹"
-  - "화이트"
+  - "해커"
   - "security"
-  - "hacking"
+  # - "hacking"
   # - "모의 침투"
   # - "침투 테스트"
   # - "CTF"
@@ -20,13 +20,16 @@ exclude_keywords:
   - "인턴"
   - "신입"
   - "주니어"
+  - "물리보안"
+  - "대원"
   - "관제"
 
 # 모니터링할 채용 사이트 (sites_config에 정의된 이름들)
 sites:
-  - jobkorea
-  - saramin
-  - skcareers
+  # - jobkorea
+  # - saramin
+  # - skcareers
+  - toss
 
 # 사이트 설정
 # 모든 사이트는 동일한 형식으로 설정합니다
@@ -89,6 +92,33 @@ sites_config:
         type: "infinite_scroll"
         max_pages: 3
 
+  - name: "toss"
+    url_template: "https://toss.im/career/jobs?search={keyword}"
+    method: "selenium"
+    base_url: "https://toss.im"
+    selectors:
+      job_list: "a.css-g65o95"
+      title: "div.css-zmhcwf"
+      company: "div.css-qbuaj4"
+      link: "a.css-g65o95"
+      detail: ""
+      pagination:
+        type: "url"
+        max_pages: 1
+
+  - name: "naver"
+    url_template: "https://recruit.navercorp.com/rcrt/list.do"
+    method: "selenium"
+    base_url: "https://recruit.navercorp.com"
+    selectors:
+      job_list: "li.card_item"
+      title: "h4.card_title"
+      company: "dd.info_text"  # Uses department as company substitute
+      link: "a.card_link"  # Will need onclick extraction in parser
+      detail: ""
+      pagination:
+        type: "url"
+        max_pages: 1
 
 # 스케줄 설정
 schedule:
